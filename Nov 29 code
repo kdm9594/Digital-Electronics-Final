@@ -1,0 +1,112 @@
+#include <Adafruit_NeoPixel.h>
+
+Adafruit_NeoPixel neopixel = Adafruit_NeoPixel(8, 31, NEO_RGB);
+
+int chordButton[4] = {33, 34, 35, 36};
+
+int majorKey[4][3] = {
+  {60, 64, 67},
+  {64, 67, 71},
+  {67, 71, 74},
+  {69, 72, 76},
+};
+int minorKey[4][3] = {
+  {60, 63, 67},
+  {63, 67, 70},
+  {67, 70, 74},
+  {68, 72, 75},
+};
+int keySwitch = 39;
+int arpeggioSwitch = 38;
+int potSpeed = 0;
+unsigned long lastStepTime = 0;
+int currentStep = 0;
+int majorColor[4][3] = {
+  {0, 255, 0},
+  {255, 255, 0},
+  {255, 0, 0},
+  {50, 0, 200},
+};
+int minorColor[4][3] = {
+  {0, 127, 127},
+  {0, 40, 255},
+  {30, 10, 200},
+  {200, 0, 60},
+};
+
+void setup() {
+  Serial.begin(9600);
+  lastStepTime = millis();
+  pinMode(keySwitch, INPUT);
+  for (int i = 0; i < 5; i++) {
+    pinMode(chordButton[i], INPUT);
+  }
+  neopixel.begin();
+  neopixel.clear();
+  neopixel.show();
+}
+
+
+void loop() {
+  potSpeed = analogRead(A13);
+  playChord();
+}
+
+void playChord() {
+
+  if (digitalRead(keySwitch) == LOW) {
+    if (millis() > lastStepTime + potSpeed) {
+      lastStepTime = millis();
+      for (int i = 0; i < 3; i++) {
+        usbMIDI.sendNoteOff(majorKey[currentStep][i], 0, 1);
+        Serial.println("major off");
+      }
+      currentStep = currentStep + 1;
+      if (currentStep == 4) {
+        currentStep = 0;
+      }
+      for (int i = 0; i < 3; i++) {
+        usbMIDI.sendNoteOn(majorKey[currentStep][i], 127, 1);
+        Serial.println("major on");
+      }
+      neopixel.setPixelColor(0, majorColor[currentStep][0], majorColor[currentStep][1], majorColor[currentStep][2]);
+      neopixel.setPixelColor(1, majorColor[currentStep][0], majorColor[currentStep][1], majorColor[currentStep][2]);
+      neopixel.setPixelColor(2, majorColor[currentStep][0], majorColor[currentStep][1], majorColor[currentStep][2]);
+      neopixel.setPixelColor(3, majorColor[currentStep][0], majorColor[currentStep][1], majorColor[currentStep][2]);
+      neopixel.setPixelColor(4, majorColor[currentStep][0], majorColor[currentStep][1], majorColor[currentStep][2]);
+      neopixel.setPixelColor(5, majorColor[currentStep][0], majorColor[currentStep][1], majorColor[currentStep][2]);
+      neopixel.setPixelColor(6, majorColor[currentStep][0], majorColor[currentStep][1], majorColor[currentStep][2]);
+      neopixel.setPixelColor(7, majorColor[currentStep][0], majorColor[currentStep][1], majorColor[currentStep][2]);
+      neopixel.show();
+    }
+  }
+
+
+
+  else if (digitalRead(keySwitch) == HIGH) {
+    if (millis() > lastStepTime + potSpeed) {
+      lastStepTime = millis();
+      for (int i = 0; i < 3; i++) {
+        usbMIDI.sendNoteOff(minorKey[currentStep][i], 0, 1);
+        Serial.println("minor off");
+      }
+      currentStep = currentStep + 1;
+      if (currentStep == 4) {
+        currentStep = 0;
+      }
+      for (int i = 0; i < 3; i++) {
+        usbMIDI.sendNoteOn(minorKey[currentStep][i], 127, 1);
+        Serial.println("minor on");
+      }
+      neopixel.setPixelColor(0, minorColor[currentStep][0], minorColor[currentStep][1], minorColor[currentStep][2]);
+      neopixel.setPixelColor(1, minorColor[currentStep][0], minorColor[currentStep][1], minorColor[currentStep][2]);
+      neopixel.setPixelColor(2, minorColor[currentStep][0], minorColor[currentStep][1], minorColor[currentStep][2]);
+      neopixel.setPixelColor(3, minorColor[currentStep][0], minorColor[currentStep][1], minorColor[currentStep][2]);
+      neopixel.setPixelColor(4, minorColor[currentStep][0], minorColor[currentStep][1], minorColor[currentStep][2]);
+      neopixel.setPixelColor(5, minorColor[currentStep][0], minorColor[currentStep][1], minorColor[currentStep][2]);
+      neopixel.setPixelColor(6, minorColor[currentStep][0], minorColor[currentStep][1], minorColor[currentStep][2]);
+      neopixel.setPixelColor(7, minorColor[currentStep][0], minorColor[currentStep][1], minorColor[currentStep][2]);
+      neopixel.show();
+    }
+  }
+}
